@@ -35,4 +35,6 @@ Date: 25/04/2026
 
 Author: Nicholas Young
 """
+import numpy as np
 
+from isingmod import IsingModel

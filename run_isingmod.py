@@ -36,4 +36,23 @@ Author: Nicholas Young
 
 
 
+"""
+Ideas :
+
+Can import ising and metropolis to compute them
+
+probs best to use a parser so I can easily change 
+the important variables associated with metropolis
+and ising model.
+
+Ising variables:
+lattice size
+temp range 
+temp iterations
+anything else?
+
+metropolis variables:
+no. of walkers?
+need to see whqat else is needed.
+"""
 

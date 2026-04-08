@@ -53,9 +53,9 @@ To achieve that we will need to realise the following functions in code:
 
 Lattice creation and random spin application.
 
-Hamiltonian calculations (local so global calculation can be found)
+Hamiltonian calculations (local, spin flip affects)
 
-magnetisation calculations (same as hamiltonian)
+magnetisation calculation.
 
 Energies are bound through spin (+1,-1) coupling between lattice sites
 where two of the same spin are energetically weaker than two of
@@ -63,19 +63,18 @@ opposing spins. This is from Pauli exclusion.
 
 For ferromagnetism J = 1 (J is coupling strength)
 
-These mag and E are needed to find the critical temp from what I can tell.
+magnetisation and E are needed to find the critical temp from what I can tell.
 
 Thats where ferromagnetism breaks down causing paramagnetism.
 
-From reading up We need to make sure these energy and magnetisation values 
-can be updated regularly with the lattice changes that metropolis will make,
-such as flipping lattice spins.
-
+From reading up these energy values need to be evaluated
+each time metropolis tries to make a spin flip.
 """
 
 class IsingModel:
 
-    """2D Ising model on a square lattice.
+    """
+    2D Ising model on a square lattice.
 
     Attributes:
         size: Linear dimension L of the L x L lattice.
@@ -84,6 +83,57 @@ class IsingModel:
         spins: Array of spin values, each in {-1, +1}.
     """
 
+    def __init__(self, size: int, coupling: float = 1.0, rng: np.random.Generator = None):
+        """
+        Initialise the Ising model with lattice construction 
+        and random spin configuration.
+
+        Args:
+            size: Linear dimension L of the square lattice.
+            coupling: Exchange coupling constant J (default 1.0).
+            rng: NumPy random generator for reproducibility.
+        """
+        self.size = size # set lattice size
+        self.coupling = coupling
+        self.n_sites = size * size
+        self._rng = rng if rng is not None else np.random.default_rng()
+        self.spins = self._rng.choice([-1, 1], size=(size, size)).astype(np.int8)
+
+    # Energy Terms
+
+    def total_energy(self) -> float:
+        """
+        Compute the total energy of the current spin configuration.
+
+        Uses vectorised roll operations to sum over all nearest-neighbour
+        pairs without explicit loops.
+
+        Returns:
+            Total energy E of the configuration.
+        """
+        spins = self.spins
+        # Sum contributions from right,left and up,down neighbours.
+        # Using np.roll as recomended to get neighbour vals.
+
+        neighbour_sum = (
+            np.roll(spins, -1, axis=1)  # right
+            + np.roll(spins, 1, axis=1)  # left
+            + np.roll(spins, -1, axis=0)  # down
+            + np.roll(spins, 1, axis=0)  # up
+        )
+        return -0.5 * self.coupling * float(np.sum(spins * neighbour_sum)) 
+        # (0.5 because each bond counted twice.)
+
+    # Other terms
+
+    def magnetisation(self) -> float:
+        """
+        Compute the mean magnetisation per site.
+
+        Returns:
+            Absolute magnetisation per site.
+        """
+        return float(np.abs(np.mean(self.spins)))
 
 
 
