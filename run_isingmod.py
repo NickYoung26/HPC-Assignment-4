@@ -85,11 +85,11 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 def simulate_temperature(
-    size: int,
-    temperature: float,
-    n_equil: int,
-    n_samples: int,
-    sample_interval: int,
+    size: int,              # Lattice size
+    temperature: float,     # Temperature (1-3K)
+    n_equil: int,           # No. of euilibriation runs
+    n_samples: int,         # No. lattice sweeps per walker
+    sample_interval: int,   # How many sweeps before sampling lattice
     rank: int,
 ) -> dict:
     """

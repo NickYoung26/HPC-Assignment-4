@@ -80,18 +80,61 @@ def sweep_ising(model: IsingModel, beta: float) -> int:
 
 def equilibrate(model, beta: float, n_equilibration: int, model_type: str = "ising"):
     """
-    Run equilibration sweeps to thermalise the Ising model 
-    for trialled temperatures.
-
-    Pretty sure we could adjust this to do xy as well?
+    Run equilibration sweeps to thermalise the model.
+    Same process for XY and Ising
 
     Args:
-        model: IsingModel (or XY)
+        model: IsingModel or XYModel
         beta: Inverse temperature.
         n_equilibration: Number of sweeps to discard.
+        model_type: Either 'ising' or 'xy'.
     """
-    sweep_fn = sweep_ising
+    sweep_fn = sweep_ising if model_type == "ising" else sweep_xy
     for _ in range(n_equilibration):
         sweep_fn(model, beta)
+
+def collect_samples(
+    model,
+    beta: float,
+    n_samples: int,
+    sample_interval: int = 1,
+    model_type: str = "ising",
+) -> dict:
+    """
+    Collect thermodynamic observables after equilibration.
+    Same process for XY and Ising
+
+    Args:
+        model: IsingModel
+        beta: Inverse temperature.
+        n_samples: Number of samples to collect.
+        sample_interval: Sweeps between successive samples.
+
+    Returns:
+        Dictionary with arrays:
+            'energy': energy per site for each sample.
+            'energy_sq': (energy per site)^2 for each sample.
+            'magnetisation': 
+    """
+    sweep_fn = sweep_ising if model_type == "ising"
+
+    energies = np.zeros(n_samples)
+    energies_sq = np.zeros(n_samples)
+
+    magnetisations = np.zeros(n_samples)
+
+    for i in range(n_samples):
+        for _ in range(sample_interval):
+            sweep_fn(model, beta)
+        e = model.energy_per_site()
+        energies[i] = e
+        energies_sq[i] = e * e
+
+        magnetisations[i] = model.magnetisation()
+
+    result = {"energy": energies, "energy_sq": energies_sq}
+    if model_type == "ising":
+        result["magnetisation"] = magnetisations
+    return result
 
 
