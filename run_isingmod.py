@@ -27,14 +27,16 @@
 """
 Version: Python 3.10.9
 
-Used to run Ising model in parrallel.
+MPI-parallel Metropolis Monte Carlo simulation of the 2D Ising model.
+
+Each MPI rank acts as an independent walker, sampling the Ising model
+at each temperature in the range [T_MIN, T_MAX]. Results (energy per
+site, specific heat, magnetisation) are gathered to rank 0, then printed.
 
 Date: 15/04/2026
 
 Author: Nicholas Young
 """
-
-
 
 """
 Ideas :
@@ -53,7 +55,9 @@ anything else?
 
 metropolis variables:
 no. of walkers?
-need to see whqat else is needed.
+number of times we do calcs
+number of times we equibliriate.
+
 """
 import argparse
 import time
@@ -115,5 +119,20 @@ def simulate_temperature(
 
     equilibrate(model, beta, n_equil, model_type="ising")
     return collect_samples(model, beta, n_samples, sample_interval, model_type="ising")
+
+def main():
+    """
+    Main entry point: distribute work across MPI ranks and gather results.
+
+    to do:
+    code runnign resultsa nd then subsequent calculation of important variables
+    (mag/N, E/N, Cv/N)
+    """
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    n_ranks = comm.Get_size()
+
+    args = parse_args()
+    temperatures = np.linspace(T_MIN, T_MAX, args.n_temps)
 
 
