@@ -124,11 +124,50 @@ class IsingModel:
         return -0.5 * self.coupling * float(np.sum(spins * neighbour_sum)) 
         # (0.5 because each bond counted twice.)
 
+    def site_energy(self, row: int, col: int) -> float:
+        """
+        Compute the local energy contribution of a single spin.
+        When using metropolis this is computationally cheaper
+        than finding total energy for each flip.
+
+        Args:
+            row: Row index of the site.
+            col: Column index of the site.
+
+        Returns:
+            Local energy contribution of spin at (row, col).
+        """
+        size = self.size
+        spin = self.spins[row, col]
+        neighbour_sum = (
+            self.spins[(row + 1) % size, col]
+            + self.spins[(row - 1) % size, col]
+            + self.spins[row, (col + 1) % size]
+            + self.spins[row, (col - 1) % size]
+        )
+        return -self.coupling * spin * neighbour_sum
+
+    def delta_energy(self, row: int, col: int) -> float:
+        """
+        Energy change from flipping spin at (row, col).
+        This will be used to check if flip is accepted or not.
+
+        Args:
+            row: Row index of the candidate spin.
+            col: Column index of the candidate spin.
+
+        Returns:
+            Change in total energy dE if the spin were flipped.
+        """
+        return -2.0 * self.site_energy(row, col)
+
     # Other terms
 
     def magnetisation(self) -> float:
         """
         Compute the mean magnetisation per site.
+        Can be used to determine weather we are
+        in a ferromagnetism or paramagnetism state.
 
         Returns:
             Absolute magnetisation per site.
