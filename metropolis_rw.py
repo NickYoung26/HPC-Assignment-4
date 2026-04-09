@@ -78,4 +78,20 @@ def sweep_ising(model: IsingModel, beta: float) -> int:
 
     return accepted
 
+def equilibrate(model, beta: float, n_equilibration: int, model_type: str = "ising"):
+    """
+    Run equilibration sweeps to thermalise the Ising model 
+    for trialled temperatures.
+
+    Pretty sure we could adjust this to do xy as well?
+
+    Args:
+        model: IsingModel (or XY)
+        beta: Inverse temperature.
+        n_equilibration: Number of sweeps to discard.
+    """
+    sweep_fn = sweep_ising
+    for _ in range(n_equilibration):
+        sweep_fn(model, beta)
+
 
