@@ -174,6 +174,16 @@ class IsingModel:
         """
         return float(np.abs(np.mean(self.spins)))
 
+    def energy_per_site(self) -> float:
+        """
+        Compute the mean energy per lattice site.
+        For comparing between multiple lattice sizes.
+
+        Returns:
+            Energy per site e = E / N.
+        """
+        return self.total_energy() / self.n_sites
+
 
 
 
