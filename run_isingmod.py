@@ -123,10 +123,6 @@ def simulate_temperature(
 def main():
     """
     Main entry point: distribute work across MPI ranks and gather results.
-
-    to do:
-    code runnign resultsa nd then subsequent calculation of important variables
-    (mag/N, E/N, Cv/N)
     """
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -134,5 +130,45 @@ def main():
 
     args = parse_args()
     temperatures = np.linspace(T_MIN, T_MAX, args.n_temps)
+
+    if rank == 0:
+        print(f"Ising model: L={args.size}, {n_ranks} MPI ranks, "
+              f"{args.n_temps} temperatures, {args.n_samples} samples/rank")
+        t_start = time.time()
+
+    # Storage arrays for rank-0 to fill
+    all_energies = np.zeros(args.n_temps)
+    all_cv = np.zeros(args.n_temps)
+    all_mag = np.zeros(args.n_temps)
+
+    for t_idx, temperature in enumerate(temperatures):
+        beta = 1.0 / temperature
+
+        # Each rank independently samples the same temperature
+        local_result = simulate_temperature(
+            args.size, temperature, args.n_equil,
+            args.n_samples, args.sample_interval, rank
+        )
+
+        # Gather all walker results to rank 0
+        all_results = comm.gather(local_result, root=0)
+
+        # Perform analysis functions at rank 0
+        if rank == 0: 
+            combined = aggregate_walker_results(all_results)
+            n_sites = args.size ** 2
+            all_energies[t_idx] = mean_energy(combined["energy"])
+            all_cv[t_idx] = specific_heat(combined["energy"], beta, n_sites)
+            all_mag[t_idx] = mean_magnetisation(combined["magnetisation"])
+
+            print(f"  T={temperature:.3f}  <e>={all_energies[t_idx]:.4f}"
+                  f"  Cv={all_cv[t_idx]:.4f}  <|m|>={all_mag[t_idx]:.4f}")
+
+    if rank == 0:
+        elapsed = time.time() - t_start
+        print(f"\nSimulation complete in {elapsed:.1f}s")
+
+if __name__ == "__main__":
+    main()
 
 
