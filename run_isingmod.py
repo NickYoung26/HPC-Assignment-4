@@ -38,27 +38,6 @@ Date: 15/04/2026
 Author: Nicholas Young
 """
 
-"""
-Ideas :
-
-Can import ising and metropolis to compute them
-
-probs best to use a parser so I can easily change 
-the important variables associated with metropolis
-and ising model.
-
-Ising variables:
-lattice size
-temp range 
-temp iterations
-anything else?
-
-metropolis variables:
-no. of walkers?
-number of times we do calcs
-number of times we equibliriate.
-
-"""
 import argparse
 import time
 
@@ -67,6 +46,7 @@ from mpi4py import MPI
 
 from isingmod import IsingModel
 from metropolis_rw import equilibrate, sweep_ising
+from analysis import specific_heat, mean_energy, mean_magnetisation, combined_walker_results
 
 # Temperature range for the Ising model (in units of k_B / J)
 T_MIN = 1.0
@@ -155,7 +135,7 @@ def main():
 
         # Perform analysis functions at rank 0
         if rank == 0: 
-            combined = aggregate_walker_results(all_results)
+            combined = combined_walker_results(all_results)
             n_sites = args.size ** 2
             all_energies[t_idx] = mean_energy(combined["energy"])
             all_cv[t_idx] = specific_heat(combined["energy"], beta, n_sites)
