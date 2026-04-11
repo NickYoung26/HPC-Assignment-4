@@ -71,7 +71,8 @@ class XYModel:
         self.angles = self._rng.uniform(0.0, 2.0 * np.pi, size=(size, size))
 
     def total_energy(self) -> float:
-        """Compute the total energy of the current angle configuration.
+        """
+        Compute the total energy of the current angle configuration.
 
         Uses vectorised roll operations over nearest-neighbour pairs.
 
@@ -86,6 +87,28 @@ class XYModel:
             + np.cos(angles - np.roll(angles, 1, axis=0))  # up
         )
         return -0.5 * self.coupling * float(np.sum(energy))
+
+    def site_energy(self, row: int, col: int) -> float:
+        """
+        Compute the local energy contribution of a single spin.
+
+        Args:
+            row: Row index of the site.
+            col: Column index of the site.
+
+        Returns:
+            Local energy contribution at (row, col).
+        """
+        size = self.size
+        theta = self.angles[row, col]
+        neighbour_angles = np.array([
+            self.angles[(row + 1) % size, col],
+            self.angles[(row - 1) % size, col],
+            self.angles[row, (col + 1) % size],
+            self.angles[row, (col - 1) % size],
+        ])
+        return -self.coupling * float(np.sum(np.cos(theta - neighbour_angles)))
+
 
 
 
