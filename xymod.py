@@ -109,6 +109,29 @@ class XYModel:
         ])
         return -self.coupling * float(np.sum(np.cos(theta - neighbour_angles)))
 
+    def delta_energy(self, row: int, col: int, new_angle: float) -> float:
+        """
+        Energy change from updating angle at (row, col) to new_angle.
+
+        Args:
+            row: Row index of the candidate spin.
+            col: Column index of the candidate spin.
+            new_angle: Proposed new angle in [0, 2*pi).
+
+        Returns:
+            Change in total energy dE for the proposed update.
+        """
+        size = self.size
+        neighbour_angles = np.array([
+            self.angles[(row + 1) % size, col],
+            self.angles[(row - 1) % size, col],
+            self.angles[row, (col + 1) % size],
+            self.angles[row, (col - 1) % size],
+        ])
+        old_e = -self.coupling * float(np.sum(np.cos(self.angles[row, col] - neighbour_angles)))
+        new_e = -self.coupling * float(np.sum(np.cos(new_angle - neighbour_angles)))
+        return new_e - old_e
+
 
 
 
