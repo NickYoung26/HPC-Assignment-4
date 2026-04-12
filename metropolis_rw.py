@@ -31,19 +31,18 @@ Version: Python 3.10.9
 Metropolis Monte Carlo sampler for 2D spin lattice models.
 
 Implements the standard Metropolis algorithm for both the
-Ising model (discrete spin flips). One Monte Carlo sweep consists of N = L*L single-site
+Ising model (discrete spin flips) and the XY model (continuous angle
+updates). One Monte Carlo sweep consists of N = L*L single-site
 update attempts.
 
 Date: 15/04/2026
 
 Author: Nicholas Young
-
-
-we could use this method for XY model as well?
 """
 import numpy as np
 
 from isingmod import IsingModel
+from xymod import XYModel
 
 def sweep_ising(model: IsingModel, beta: float) -> int:
     """
@@ -74,6 +73,41 @@ def sweep_ising(model: IsingModel, beta: float) -> int:
         delta_e = model.delta_energy(row, col)
         if delta_e <= 0.0 or log_randoms[k] < -beta * delta_e:
             model.spins[row, col] *= -1
+            accepted += 1
+
+    return accepted
+
+def sweep_xy(model: XYModel, beta: float, max_angle_step: float = np.pi) -> int:
+    """
+    Perform one full Metropolis sweep over all XY lattice sites.
+
+    Each site is visited once. A random angle perturbation drawn uniformly
+    from [-max_angle_step, +max_angle_step] is proposed and accepted with
+    probability min(1, exp(-beta * dE)).
+
+    Args:
+        model: XYModel instance to update in place.
+        beta: Inverse temperature 1 / (k_B * T).
+        max_angle_step: Maximum magnitude of proposed angle change (radians).
+
+    Returns:
+        Number of accepted angle updates during the sweep.
+    """
+    size = model.size
+    rng = model._rng
+    accepted = 0
+
+    rows = rng.integers(0, size, size=model.n_sites)
+    cols = rng.integers(0, size, size=model.n_sites)
+    angle_steps = rng.uniform(-max_angle_step, max_angle_step, size=model.n_sites)
+    log_randoms = np.log(rng.uniform(0.0, 1.0, size=model.n_sites))
+
+    for k in range(model.n_sites):
+        row, col = rows[k], cols[k]
+        new_angle = (model.angles[row, col] + angle_steps[k]) % (2.0 * np.pi)
+        delta_e = model.delta_energy(row, col, new_angle)
+        if delta_e <= 0.0 or log_randoms[k] < -beta * delta_e:
+            model.angles[row, col] = new_angle
             accepted += 1
 
     return accepted
