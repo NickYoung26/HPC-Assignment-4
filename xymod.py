@@ -150,6 +150,14 @@ class XYModel:
         angles = self.angles
         return float(np.mean(np.cos(angles - np.roll(angles, r, axis=1))))
 
+    def energy_per_site(self) -> float:
+        """Compute the mean energy per lattice site.
+
+        Returns:
+            Energy per site e = E / N.
+        """
+        return self.total_energy() / self.n_sites
+
 
 
 
