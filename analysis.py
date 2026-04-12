@@ -116,3 +116,15 @@ def mean_magnetisation(magnetisations: np.ndarray) -> float:
         Mean absolute magnetisation <|m|>.
     """
     return float(np.mean(np.abs(magnetisations)))
+
+def mean_correlation(correlations: np.ndarray) -> float:
+    """
+    Compute the mean spin correlation at a given separation.
+
+    Args:
+        correlations: 1-D array of sampled C(r) values.
+
+    Returns:
+        Mean spin correlation <C(r)>.
+    """
+    return float(np.mean(correlations))
