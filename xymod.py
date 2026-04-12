@@ -132,6 +132,24 @@ class XYModel:
         new_e = -self.coupling * float(np.sum(np.cos(new_angle - neighbour_angles)))
         return new_e - old_e
 
+    def spin_correlation(self, r_frac: float) -> float:
+        """
+        Compute the average spin–spin correlation at fractional distance r_frac.
+
+        The correlation at fractional separation r/L is estimated by averaging
+        cos(theta_i - theta_j) over all pairs separated by approximately r sites
+        along the x-axis.
+
+        Args:
+            r_frac: Fractional separation r / L, where 0 < r_frac <= 0.5.
+
+        Returns:
+            Mean spin correlation C(r) at the given fractional distance.
+        """
+        r = max(1, int(round(r_frac * self.size)))
+        angles = self.angles
+        return float(np.mean(np.cos(angles - np.roll(angles, r, axis=1))))
+
 
 
 
