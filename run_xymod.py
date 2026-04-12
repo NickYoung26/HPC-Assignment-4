@@ -23,3 +23,82 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # =============================================================================
+
+"""
+Version: Python 3.10.9
+
+MPI-parallel Metropolis Monte Carlo simulation of the 2D XY model.
+
+Each MPI rank acts as an independent walker, sampling the XY model at
+each temperature in the range [T_MIN, T_MAX]. Results (energy per site,
+specific heat, spin correlations) are gathered to rank 0, which writes
+them to a NumPy .npz archive.
+
+Date: 15/04/2026
+
+Author: Nicholas Young
+"""
+
+import argparse
+import time
+
+import numpy as np
+from mpi4py import MPI
+
+from xymod import XYModel
+from metropolis_rw import equilibrate, collect_samples
+from analysis import specific_heat, mean_energy, mean_correlation, combined_walker_results
+
+# Temperature range for the XY model (in units of k_B / J)
+T_MIN = 0.5
+T_MAX = 1.5
+
+# Fractional separations at which to evaluate spin correlations
+N_CORR_POINTS = 10
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments.
+
+    Returns:
+        Parsed argument namespace.
+    """
+    parser = argparse.ArgumentParser(description="2D XY model MPI simulation")
+    parser.add_argument("--size", type=int, default=32, help="Lattice size L")
+    parser.add_argument("--n-temps", type=int, default=20, help="Number of temperature points")
+    parser.add_argument("--n-equil", type=int, default=2000, help="Equilibration sweeps")
+    parser.add_argument("--n-samples", type=int, default=2500, help="Production samples per walker")
+    parser.add_argument("--sample-interval", type=int, default=5, help="Sweeps between samples")
+    parser.add_argument("--outfile", type=str, default=r"xy_results.npz", help="Output filename")
+    return parser.parse_args()
+
+def simulate_temperature(
+    size: int,
+    temperature: float,
+    n_equil: int,
+    n_samples: int,
+    sample_interval: int,
+    rank: int,
+) -> dict:
+    """
+    Run equilibration and production for one temperature on this rank.
+
+    Args:
+        size: Lattice size L.
+        temperature: Temperature T in units of k_B / J.
+        n_equil: Number of equilibration sweeps.
+        n_samples: Number of production samples to collect.
+        sample_interval: Sweeps between successive samples.
+        rank: MPI rank (used to seed the RNG uniquely).
+
+    Returns:
+        Dictionary of sampled observables.
+    """
+    seed = abs(hash((rank, temperature, "xy"))) % (2 ** 31)
+    rng = np.random.default_rng(seed)
+    model = XYModel(size=size, coupling=1.0, rng=rng)
+    beta = 1.0 / temperature
+
+    equilibrate(model, beta, n_equil, model_type="xy")
+    return collect_samples(model, beta, n_samples, sample_interval, model_type="xy")
+

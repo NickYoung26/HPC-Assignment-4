@@ -158,6 +158,3 @@ class XYModel:
         """
         return self.total_energy() / self.n_sites
 
-
-
-
