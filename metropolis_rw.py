@@ -97,11 +97,13 @@ def sweep_xy(model: XYModel, beta: float, max_angle_step: float = np.pi) -> int:
     rng = model._rng
     accepted = 0
 
+    # Visit sites in random order
     rows = rng.integers(0, size, size=model.n_sites)
     cols = rng.integers(0, size, size=model.n_sites)
     angle_steps = rng.uniform(-max_angle_step, max_angle_step, size=model.n_sites)
     log_randoms = np.log(rng.uniform(0.0, 1.0, size=model.n_sites))
 
+    # Spin flipper and accepted counter
     for k in range(model.n_sites):
         row, col = rows[k], cols[k]
         new_angle = (model.angles[row, col] + angle_steps[k]) % (2.0 * np.pi)
@@ -139,23 +141,29 @@ def collect_samples(
     Same process for XY and Ising
 
     Args:
-        model: IsingModel
+        model: IsingModel or XYModel instance (already equilibrated).
         beta: Inverse temperature.
         n_samples: Number of samples to collect.
         sample_interval: Sweeps between successive samples.
+        model_type: Either 'ising' or 'xy'.
 
     Returns:
         Dictionary with arrays:
             'energy': energy per site for each sample.
             'energy_sq': (energy per site)^2 for each sample.
-            'magnetisation': 
+            For Ising also 'magnetisation'.
+            For XY also 'correlations': dict mapping r_frac -> array.
     """
-    sweep_fn = sweep_ising if model_type == "ising"
+    sweep_fn = sweep_ising if model_type == "ising" else sweep_xy
 
     energies = np.zeros(n_samples)
     energies_sq = np.zeros(n_samples)
 
-    magnetisations = np.zeros(n_samples)
+    if model_type == "ising":
+        magnetisations = np.zeros(n_samples)
+    else:
+        r_fracs = np.linspace(1.0 / model.size, 0.5, num=10)
+        correlations = {r: np.zeros(n_samples) for r in r_fracs}
 
     for i in range(n_samples):
         for _ in range(sample_interval):
@@ -164,11 +172,15 @@ def collect_samples(
         energies[i] = e
         energies_sq[i] = e * e
 
-        magnetisations[i] = model.magnetisation()
+        if model_type == "ising":
+            magnetisations[i] = model.magnetisation()
+        else:
+            for r in r_fracs:
+                correlations[r][i] = model.spin_correlation(r)
 
     result = {"energy": energies, "energy_sq": energies_sq}
     if model_type == "ising":
         result["magnetisation"] = magnetisations
+    else:
+        result["correlations"] = correlations
     return result
-
-
