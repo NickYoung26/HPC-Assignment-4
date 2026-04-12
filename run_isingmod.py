@@ -147,6 +147,18 @@ def main():
     if rank == 0:
         elapsed = time.time() - t_start
         print(f"\nSimulation complete in {elapsed:.1f}s")
+        np.savez(
+            args.outfile,
+            temperatures=temperatures,
+            energies=all_energies,
+            specific_heat=all_cv,
+            correlations=all_correlations,
+            r_fracs=r_fracs,
+            size=np.array([args.size]),
+            n_ranks=np.array([n_ranks]),
+            elapsed=np.array([elapsed]),
+        )
+        print(f"Results saved to {args.outfile}")
 
 if __name__ == "__main__":
     main()
