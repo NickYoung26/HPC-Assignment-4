@@ -45,7 +45,7 @@ import numpy as np
 from mpi4py import MPI
 
 from isingmod import IsingModel
-from metropolis_rw import equilibrate, sweep_ising
+from metropolis_rw import equilibrate, sweep_ising, collect_samples
 from analysis import specific_heat, mean_energy, mean_magnetisation, combined_walker_results
 
 # Temperature range for the Ising model (in units of k_B / J)
@@ -152,8 +152,7 @@ def main():
             temperatures=temperatures,
             energies=all_energies,
             specific_heat=all_cv,
-            correlations=all_correlations,
-            r_fracs=r_fracs,
+            magnetisation=all_mag,
             size=np.array([args.size]),
             n_ranks=np.array([n_ranks]),
             elapsed=np.array([elapsed]),

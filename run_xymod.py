@@ -46,7 +46,7 @@ import numpy as np
 from mpi4py import MPI
 
 from xymod import XYModel
-from metropolis_rw import equilibrate, collect_samples
+from metropolis_rw import equilibrate, sweep_xy, collect_samples
 from analysis import specific_heat, mean_energy, mean_correlation, combined_walker_results
 
 # Temperature range for the XY model (in units of k_B / J)
@@ -135,7 +135,7 @@ def main():
         all_results = comm.gather(local_result, root=0)
 
         if rank == 0:
-            combined = aggregate_walker_results(all_results)
+            combined = combined_walker_results(all_results)
             n_sites = args.size ** 2
             all_energies[t_idx] = mean_energy(combined["energy"])
             all_cv[t_idx] = specific_heat(combined["energy"], beta, n_sites)

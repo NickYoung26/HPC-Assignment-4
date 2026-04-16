@@ -128,3 +128,34 @@ def mean_correlation(correlations: np.ndarray) -> float:
         Mean spin correlation <C(r)>.
     """
     return float(np.mean(correlations))
+
+def vortex_density(angles: np.ndarray) -> float:
+    """
+    Compute the density of vortices in the XY configuration.
+
+    A vortex is a plaquette (elementary square of four sites) around which
+    the total winding of the spin angle is +2*pi (vortex) or -2*pi
+    (antivortex). The winding is computed by summing the angle differences
+    around each plaquette and wrapping to [-pi, pi].
+
+    Below T_BKT, vortices and antivortices are tightly bound in pairs,
+    giving a low density. Above T_BKT they unbind and proliferate.
+
+    Args:
+        angles: (L, L) array of current spin angles.
+
+    Returns:
+        Vortex density: (number of vortices + antivortices) / N_sites.
+    """
+    # Angle differences along x and y bonds
+    dx = np.mod(angles - np.roll(angles, -1, axis=1) + np.pi, 2 * np.pi) - np.pi
+    dy = np.mod(angles - np.roll(angles, -1, axis=0) + np.pi, 2 * np.pi) - np.pi
+
+    # Circulation around each plaquette (four bonds, anticlockwise)
+    curl = dx + np.roll(dy, -1, axis=1) - np.roll(dx, -1, axis=0) - dy
+
+    # A plaquette with curl close to 2*pi hosts a vortex or antivortex
+    n_vortices = int(np.sum(np.abs(curl) > np.pi))
+    return n_vortices / angles.size
+
+

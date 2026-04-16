@@ -43,34 +43,6 @@ Author: Nicholas Young
 
 import numpy as np
 
-"""
-Ideas (delete later):
-
-Create Ising model as a class of functions which describe the core principles
-of the model.
-
-To achieve that we will need to realise the following functions in code:
-
-Lattice creation and random spin application.
-
-Hamiltonian calculations (local, spin flip affects)
-
-magnetisation calculation.
-
-Energies are bound through spin (+1,-1) coupling between lattice sites
-where two of the same spin are energetically weaker than two of
-opposing spins. This is from Pauli exclusion.
-
-For ferromagnetism J = 1 (J is coupling strength)
-
-magnetisation and E are needed to find the critical temp from what I can tell.
-
-Thats where ferromagnetism breaks down causing paramagnetism.
-
-From reading up these energy values need to be evaluated
-each time metropolis tries to make a spin flip.
-"""
-
 class IsingModel:
 
     """
