@@ -123,6 +123,7 @@ def main():
     
     # spin correlations[t_idx, r_idx]
     all_correlations = np.zeros((args.n_temps, len(r_fracs)))
+    all_vortex = np.zeros(args.n_temps)
 
     for t_idx, temperature in enumerate(temperatures):
         beta = 1.0 / temperature
@@ -139,6 +140,7 @@ def main():
             n_sites = args.size ** 2
             all_energies[t_idx] = mean_energy(combined["energy"])
             all_cv[t_idx] = specific_heat(combined["energy"], beta, n_sites)
+            all_vortex[t_idx] = float(np.mean(combined["vortex_density"]))
 
             for r_idx, r in enumerate(r_fracs):
                 all_correlations[t_idx, r_idx] = mean_correlation(
@@ -146,7 +148,8 @@ def main():
                 )
 
             print(f"  T={temperature:.3f}  <e>={all_energies[t_idx]:.4f}"
-                  f"  Cv={all_cv[t_idx]:.4f} cor={all_correlations[t_idx, r_idx]:.3f}")
+                  f"  Cv={all_cv[t_idx]:.4f} cor={all_correlations[t_idx, r_idx]:.3f}"
+                  f"  n_v={all_vortex[t_idx]:.4f}")
 
     if rank == 0:
         elapsed = time.time() - t_start
@@ -158,6 +161,7 @@ def main():
             specific_heat=all_cv,
             correlations=all_correlations,
             r_fracs=r_fracs,
+            vortex_density=all_vortex
             size=np.array([args.size]),
             n_ranks=np.array([n_ranks]),
             elapsed=np.array([elapsed]),

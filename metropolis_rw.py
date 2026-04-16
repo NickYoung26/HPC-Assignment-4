@@ -43,6 +43,7 @@ import numpy as np
 
 from isingmod import IsingModel
 from xymod import XYModel
+from analysis import vortex_density
 
 def sweep_ising(model: IsingModel, beta: float) -> int:
     """
@@ -165,6 +166,12 @@ def collect_samples(
         r_fracs = np.linspace(1.0 / model.size, 0.5, num=10)
         correlations = {r: np.zeros(n_samples) for r in r_fracs}
 
+    if model_type == "xy":
+        from analysis import vortex_density
+        temperature = 1.0 / beta
+        helicity = np.zeros(n_samples)
+        vortices = np.zeros(n_samples)
+
     for i in range(n_samples):
         for _ in range(sample_interval):
             sweep_fn(model, beta)
@@ -177,10 +184,12 @@ def collect_samples(
         else:
             for r in r_fracs:
                 correlations[r][i] = model.spin_correlation(r)
+            vortices[i] = vortex_density(model.angles)
 
     result = {"energy": energies, "energy_sq": energies_sq}
     if model_type == "ising":
         result["magnetisation"] = magnetisations
     else:
         result["correlations"] = correlations
+        result["vortex_density"] = vortices
     return result
