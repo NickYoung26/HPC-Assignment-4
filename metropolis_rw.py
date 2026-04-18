@@ -39,7 +39,7 @@ Date: 15/04/2026
 
 Author: Nicholas Young
 """
-import numpy as np
+import numpy as np # pylint: disable=import-error
 
 from isingmod import IsingModel
 from xymod import XYModel
@@ -60,7 +60,7 @@ def sweep_ising(model: IsingModel, beta: float) -> int:
         Number of accepted spin flips during the sweep.
     """
     size = model.size
-    rng = model._rng
+    rng = model._rng # pylint: disable=protected-access
     accepted = 0
 
     # Visit sites in random order (systematic bias)
@@ -95,7 +95,7 @@ def sweep_xy(model: XYModel, beta: float, max_angle_step: float = np.pi) -> int:
         Number of accepted angle updates during the sweep.
     """
     size = model.size
-    rng = model._rng
+    rng = model._rng # pylint: disable=protected-access
     accepted = 0
 
     # Visit sites in random order
@@ -165,11 +165,6 @@ def collect_samples(
     else:
         r_fracs = np.linspace(1.0 / model.size, 0.5, num=10)
         correlations = {r: np.zeros(n_samples) for r in r_fracs}
-
-    if model_type == "xy":
-        from analysis import vortex_density
-        temperature = 1.0 / beta
-        helicity = np.zeros(n_samples)
         vortices = np.zeros(n_samples)
 
     for i in range(n_samples):
@@ -184,6 +179,7 @@ def collect_samples(
         else:
             for r in r_fracs:
                 correlations[r][i] = model.spin_correlation(r)
+
             vortices[i] = vortex_density(model.angles)
 
     result = {"energy": energies, "energy_sq": energies_sq}

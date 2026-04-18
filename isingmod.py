@@ -41,7 +41,7 @@ Date: 15/04/2026
 Author: Nicholas Young
 """
 
-import numpy as np
+import numpy as np # pylint: disable=import-error
 
 class IsingModel:
 
@@ -93,7 +93,7 @@ class IsingModel:
             + np.roll(spins, -1, axis=0)  # down
             + np.roll(spins, 1, axis=0)  # up
         )
-        return -0.5 * self.coupling * float(np.sum(spins * neighbour_sum)) 
+        return -0.5 * self.coupling * float(np.sum(spins * neighbour_sum))
         # (0.5 because each bond counted twice.)
 
     def site_energy(self, row: int, col: int) -> float:
@@ -155,12 +155,3 @@ class IsingModel:
             Energy per site e = E / N.
         """
         return self.total_energy() / self.n_sites
-
-
-
-
-
-
-
-
-

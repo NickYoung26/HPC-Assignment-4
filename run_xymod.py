@@ -42,11 +42,11 @@ Author: Nicholas Young
 import argparse
 import time
 
-import numpy as np
-from mpi4py import MPI
+import numpy as np # pylint: disable=import-error
+from mpi4py import MPI # pylint: disable=import-error
 
 from xymod import XYModel
-from metropolis_rw import equilibrate, sweep_xy, collect_samples
+from metropolis_rw import equilibrate, collect_samples
 from analysis import specific_heat, mean_energy, mean_correlation, combined_walker_results
 
 # Temperature range for the XY model (in units of k_B / J)
@@ -120,7 +120,7 @@ def main():
 
     all_energies = np.zeros(args.n_temps)
     all_cv = np.zeros(args.n_temps)
-    
+
     # spin correlations[t_idx, r_idx]
     all_correlations = np.zeros((args.n_temps, len(r_fracs)))
     all_vortex = np.zeros(args.n_temps)
@@ -148,7 +148,7 @@ def main():
                 )
 
             print(f"  T={temperature:.3f}  <e>={all_energies[t_idx]:.4f}"
-                  f"  Cv={all_cv[t_idx]:.4f} cor={all_correlations[t_idx, r_idx]:.3f}"
+                  f"  Cv={all_cv[t_idx]:.4f} cor={all_correlations[t_idx, r_idx]:.3f}" # pylint: disable=undefined-loop-variable
                   f"  n_v={all_vortex[t_idx]:.4f}")
 
     if rank == 0:
@@ -161,7 +161,7 @@ def main():
             specific_heat=all_cv,
             correlations=all_correlations,
             r_fracs=r_fracs,
-            vortex_density=all_vortex
+            vortex_density=all_vortex,
             size=np.array([args.size]),
             n_ranks=np.array([n_ranks]),
             elapsed=np.array([elapsed]),
@@ -170,4 +170,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

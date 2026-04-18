@@ -41,16 +41,16 @@ Author: Nicholas Young
 import argparse
 import time
 
-import numpy as np
-from mpi4py import MPI
+import numpy as np # pylint: disable=import-error
+from mpi4py import MPI # pylint: disable=import-error
 
 from isingmod import IsingModel
-from metropolis_rw import equilibrate, sweep_ising, collect_samples
+from metropolis_rw import equilibrate, collect_samples
 from analysis import specific_heat, mean_energy, mean_magnetisation, combined_walker_results
 
 # Temperature range for the Ising model (in units of k_B / J)
 T_MIN = 1.0
-T_MAX = 3.0 
+T_MAX = 3.0
 
 def parse_args() -> argparse.Namespace:
     """
@@ -94,7 +94,7 @@ def simulate_temperature(
     """
     seed = abs(hash((rank, temperature))) % (2 ** 31)
     rng = np.random.default_rng(seed)
-    model = IsingModel(size=size, coupling=1.0, rng=rng) # J = 1 
+    model = IsingModel(size=size, coupling=1.0, rng=rng) # J = 1
     beta = 1.0 / temperature
 
     equilibrate(model, beta, n_equil, model_type="ising")
@@ -134,7 +134,7 @@ def main():
         all_results = comm.gather(local_result, root=0)
 
         # Perform analysis functions at rank 0
-        if rank == 0: 
+        if rank == 0:
             combined = combined_walker_results(all_results)
             n_sites = args.size ** 2
             all_energies[t_idx] = mean_energy(combined["energy"])
@@ -161,5 +161,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

@@ -39,7 +39,7 @@ Author: Nicholas Young
 
 """
 
-import numpy as np
+import numpy as np # pylint: disable=import-error
 
 def combined_walker_results(results: list) -> dict:
     """
@@ -117,18 +117,6 @@ def mean_magnetisation(magnetisations: np.ndarray) -> float:
     """
     return float(np.mean(np.abs(magnetisations)))
 
-def mean_correlation(correlations: np.ndarray) -> float:
-    """
-    Compute the mean spin correlation at a given separation.
-
-    Args:
-        correlations: 1-D array of sampled C(r) values.
-
-    Returns:
-        Mean spin correlation <C(r)>.
-    """
-    return float(np.mean(correlations))
-
 def vortex_density(angles: np.ndarray) -> float:
     """
     Compute the density of vortices in the XY configuration.
@@ -158,4 +146,14 @@ def vortex_density(angles: np.ndarray) -> float:
     n_vortices = int(np.sum(np.abs(curl) > np.pi))
     return n_vortices / angles.size
 
+def mean_correlation(correlations: np.ndarray) -> float:
+    """
+    Compute the mean spin correlation at a given separation.
 
+    Args:
+        correlations: 1-D array of sampled C(r) values.
+
+    Returns:
+        Mean spin correlation <C(r)>.
+    """
+    return float(np.mean(correlations))

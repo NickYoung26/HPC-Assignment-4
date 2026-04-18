@@ -40,7 +40,7 @@ Date: 15/04/2026
 Author: Nicholas Young
 """
 
-import numpy as np
+import numpy as np # pylint: disable=import-error
 
 
 class XYModel:
@@ -157,4 +157,3 @@ class XYModel:
             Energy per site e = E / N.
         """
         return self.total_energy() / self.n_sites
-
