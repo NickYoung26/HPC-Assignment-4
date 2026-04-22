@@ -72,8 +72,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sample-interval", type=int, default=20, help="Sweeps between samples")
     parser.add_argument("--outfile", type=str, default=r"xy_results.npz", help="Output filename")
     return parser.parse_args()
-
-def simulate_temperature(
+def simulate_temperature( # pylint: disable=too-many-arguments too-many-positional-arguments
     size: int,
     temperature: float,
     n_equil: int,
@@ -103,7 +102,7 @@ def simulate_temperature(
     equilibrate(model, beta, n_equil, model_type="xy")
     return collect_samples(model, beta, n_samples, sample_interval, model_type="xy")
 
-def main():
+def main(): # pylint: disable=too-many-locals
     """Main entry point: distribute work across MPI ranks and gather results."""
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()

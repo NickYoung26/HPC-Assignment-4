@@ -130,7 +130,7 @@ def equilibrate(model, beta: float, n_equilibration: int, model_type: str = "isi
     for _ in range(n_equilibration):
         sweep_fn(model, beta)
 
-def collect_samples(
+def collect_samples( # pylint: disable=too-many-locals
     model,
     beta: float,
     n_samples: int,
